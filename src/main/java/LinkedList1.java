@@ -19,10 +19,10 @@ public class LinkedList1 {
 
 
             long startTime1 = Instant.now().toEpochMilli();
-        LinkedList<String> a = new LinkedList<>();
+        LinkedList<Integer> a = new LinkedList<>();
         for (long i=0;i<10000000;i++)
         {
-            list.add(0);
+            a.add(0);
         }
         long endTime1 = Instant.now().toEpochMilli();
 
