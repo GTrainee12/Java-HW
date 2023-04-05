@@ -1,13 +1,12 @@
+package Hero;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import Hero.*;
-
-
-
 public class Main {
+
     public static void main( String[] args ) {
         System.out.println( "\nПрограмма создат 2 списка по 10 случайных персонажей.\n" );
 
@@ -49,20 +48,27 @@ public class Main {
 
         // Выборка по скорости от максимальной к минимальное
         // for (int i = 0; i < count * 2; i++) {
-        System.out.println( "\nlist_1 ");
+        System.out.println( "\nlist_1 - Не сортированный" );
         System.out.println( list_1 );
 
+        Collections.sort( list_1 );
 
-        System.out.println( "\nlist_2 ");
+        System.out.println( "\nlist_1 - Сортированный" );
+        System.out.println( list_1 );
+        //
+
+        System.out.println( "\nlist_2 - Не сортированный" );
+        System.out.println( list_2 );
+
+        Collections.sort( list_2 );
+
+        System.out.println( "\nlist_2 - Сортированный" );
         System.out.println( list_2 );
 
     }
+
 
     private static String getName() {
         return Names.values()[ new Random().nextInt( Names.values().length ) ].toString();
     }
 }
-
-
-
-
