@@ -1,19 +1,35 @@
 package Fantasy_game.units;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 public class Archer extends Marksman {
-    public Archer(Vector2D coords) {
-        super("Archer: ",35.f, 35, 5, 2, 5, 2,
-                9, 10, 10, coords.posX, coords.posY);
+    private final int BowDamage;
+    public Archer(String name,Vector2D coords) {
+        super(15,15,75,name,35,35,4,4,4,9,coords.posX, coords.posY);
+        this.BowDamage = 5;
+
     }
-
     @Override
-    public StringBuilder getInfo() {
+    public void attackTarget() {
+        if (new Random().nextInt(1, 101) <= this.accuracy) {
+            if ((float) (this.BowDamage - this.targetHero.armor) / (float) this.targetHero.hp >= 0.2){
+                System.out.println(this.getInfo() + " " + this.name +
+                        " attacks ♥️ of " + this.targetHero.getInfo() + this.targetHero.name);
+                this.targetHero.getStrengthDamage(Math.max(this.BowDamage - this.targetHero.armor, 0));
+            }else{
+                System.out.println(this.getInfo() + " " + this.name +
+                        " attacks \uD83D\uDEE1 of " + this.targetHero.getInfo() + this.targetHero.name);
+                this.targetHero.getArmorDamage(this.defenseBreak);
+            }
+        } else {
+            System.out.println(this.getInfo() + this.name + " misses "+
+                    "trying to attack "+this.targetHero.getInfo()+" "+this.targetHero.name);
+        }
 
-        StringBuilder builder = new StringBuilder();
-        return builder.append("Archer: \t").append(Archer.super.name)
-                .append("\t| ATK:\t").append(Archer.super.attack)
-                .append("\t| HP:\t").append(Archer.super.hp)
-                .append(" \t| Arrows:").append(Archer.super.ammo)
-                .append("\t|").append("\t| (X.Y) : ").append(Archer.super.coords.posX).append(".").append(Archer.super.coords.posY);
+    }
+    @Override
+    public String getInfo() {
+        return "Archer ";
     }
 }

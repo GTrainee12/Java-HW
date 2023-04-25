@@ -1,18 +1,36 @@
 package Fantasy_game.units;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 public class Crossbowman extends Marksman {
-    public Crossbowman(Vector2D coords) {
-        super("Cross: ",40.f, 40, 7, 3, 7, 4,
-                9, 20, 10, coords.posX, coords.posY);
+
+    protected final int CrossbowDamage;
+        public Crossbowman(String name, Vector2D coords) {
+        super(15,15,75,name,40,40,4,4,6,9, coords.posX, coords.posY);
+        this.CrossbowDamage = 8;
     }
 
     @Override
-    public StringBuilder getInfo() {
-        StringBuilder builder = new StringBuilder();
-        return builder.append("Crossbowman: \t").append(Crossbowman.super.name)
-                .append("\t| ATK:\t").append(Crossbowman.super.attack)
-                .append("\t| HP:\t").append(Crossbowman.super.hp)
-                .append(" \t| Arrows:").append(Crossbowman.super.ammo)
-                .append("\t|").append("\t| (X.Y) : ").append(Crossbowman.super.coords.posX).append(".").append(Crossbowman.super.coords.posY);
+    public void attackTarget() {
+        if (new Random().nextInt(1, 101) <= this.accuracy) {
+            if ((float) (this.CrossbowDamage - this.targetHero.armor) / (float) this.targetHero.hp >= 0.2) {
+                System.out.println(this.getInfo() + " " + this.name +
+                        " attacks ♥️ of " + this.targetHero.getInfo() + this.targetHero.name);
+                this.targetHero.getStrengthDamage(Math.max(this.CrossbowDamage - this.targetHero.armor, 0));
+            } else {
+                System.out.println(this.getInfo() + " " + this.name +
+                        " attacks \uD83D\uDEE1 of " + this.targetHero.getInfo() + this.targetHero.name);
+                this.targetHero.getArmorDamage(this.defenseBreak);
+            }
+        } else {
+            System.out.println(this.getInfo() + this.name + " misses " +
+                    "trying to attack " + this.targetHero.getInfo() + " " + this.targetHero.name);
+        }
+
+    }
+    @Override
+    public String getInfo() {
+    return "Crossbowman ";
     }
 }

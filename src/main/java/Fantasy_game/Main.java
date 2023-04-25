@@ -3,71 +3,88 @@ package Fantasy_game;
 import Fantasy_game.units.*;
 import java.util.*;
 
+public class Main {
 
-        public class Main {
-            public static final int UNITS = 10;
             public static ArrayList<Hero> group_elves = new ArrayList<>();
             public static ArrayList<Hero> group_people = new ArrayList<>();
-            public static ArrayList<Hero> allTeam = new ArrayList<>();
+            public static PriorityQueue<Hero> bothTeamsInTurnOrder;
+            public int turnCount;
+            public int teamSize;
 
-            public static void main(String[] args) {
-                init();
-                Scanner input = new Scanner(System.in);
-                while (true){
-                    allTeam = sortTeam();
-                    View.view();
-                    input.nextLine();
-                    for (Hero human: allTeam) {
-                        if (group_people.contains(human)) human.step(group_people, group_elves);
-                        else human.step(group_elves, group_people);
-                    }
-                }
-            }
 
-            private static void init() {
-                for (int i = 0; i < UNITS; i++) {
+            public void setTeams(int teamSize) {
+                    this.teamSize = teamSize;
+                    this.group_elves = new ArrayList<>();
+                    this.group_people = new ArrayList<>();
+                for (int i = 0; i < teamSize; i++) {
                     int rnd = new Random().nextInt(4);
                     switch (rnd) {
                         case (0):
-                            group_elves.add(new Archer(new Vector2D(i+1, 1)));
+                            group_elves.add(new Archer(getName(),new Vector2D(i+1, 1)));
                             break;
                         case (1):
-                            group_elves.add(new Knight(new Vector2D(i+1, 1)));
+                            group_elves.add(new Knight(getName(),new Vector2D(i+1, 1)));
                             break;
                         case (2):
-                            group_elves.add(new Spectrum(new Vector2D(i+1, 1)));
+                            group_elves.add(new Spectrum(getName(),new Vector2D(i+1, 1)));
                             break;
                         default:
-                            group_elves.add(new Militiaman(new Vector2D(i+1, 1)));
+                            group_elves.add(new Militiaman(getName(),new Vector2D(i+1, 1)));
                     }
 
                     rnd = new Random().nextInt(4);
                     switch (rnd) {
                         case (0):
-                            group_people.add(new Militiaman(new Vector2D(i+1, 10)));
+                            group_people.add(new Militiaman(getName(), new Vector2D(i+1, 10)));
                             break;
                         case (1):
-                            group_people.add(new Crossbowman(new Vector2D(i+1, 10)));
+                            group_people.add(new Crossbowman(getName(),new Vector2D(i+1, 10)));
                             break;
                         case (2):
-                            group_people.add(new Monk(new Vector2D(i+1, 10)));
+                            group_people.add(new Monk(getName(),new Vector2D(i+1, 10)));
                             break;
                         default:
-                            group_people.add(new Spearman(new Vector2D(i+1, 10)));
+                            group_people.add(new Spearman(getName(),new Vector2D(i+1, 10)));
                     }
                 }
             }
-            private static ArrayList<Hero> sortTeam (){
-                ArrayList<Hero> list = new ArrayList<>();
-                list.addAll(group_elves);
-                list.addAll(group_people);
-                list.sort(new Comparator<Hero>() {
+            public void setTurnOrder(){
+                this.bothTeamsInTurnOrder = new PriorityQueue<>(new Comparator<Hero>() {
                     @Override
-                    public int compare(Hero t0, Hero t1) {
-                        if (t1.getSpeed() == t0.getSpeed()) return (int) (t1.getHp() - t0.getHp());
-                        else  return (int) (t1.getSpeed() - t0.getSpeed());
+                    public int compare(Hero h1, Hero h2) {
+                        if (h1.speed==h2.speed) {
+                            if (h2.getStrPerc()>h1.getStrPerc()) return 1;
+                            else return -1;
+                        }
+                        return h2.speed-h1.speed;
                     }
                 });
-                return list;
+                this.bothTeamsInTurnOrder.addAll(this.group_elves);
+                this.bothTeamsInTurnOrder.addAll(this.group_people);
+            }
+            public void gameTurn(){
+                while (!this.bothTeamsInTurnOrder.isEmpty()){
+                    if (this.group_elves.contains(this.bothTeamsInTurnOrder.peek()))
+                        this.bothTeamsInTurnOrder.poll().step(this.group_people, this.group_elves);
+                    else this.bothTeamsInTurnOrder.poll().step(this.group_elves, this.group_people);
+                }
+            }
+
+            public boolean teamOneDead(){
+                for (Hero hero:
+                        this.group_elves) {
+                    if (!hero.state.equals("dead")) return false;
+                }
+                return true;
+            }
+            public boolean teamTwoDead(){
+                for (Hero hero:
+                        this.group_people) {
+                    if (!hero.state.equals("dead")) return false;
+                }
+                return true;
+            }
+            protected static String getName(){
+                return Nme.values()[new Random().nextInt( Nme.values().length ) ].toString();
             }
         }

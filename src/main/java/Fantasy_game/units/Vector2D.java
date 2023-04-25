@@ -1,19 +1,30 @@
 package Fantasy_game.units;
 
 public class Vector2D {
-    protected int posX;
-    protected int posY;
+    public int posX;
+    public int posY;
 
     public Vector2D(int posX, int posY) {
         this.posX = posX;
         this.posY = posY;
     }
 
-    protected boolean isLeft(Vector2D oponent){
-        return posX < oponent.posX;
+    public double distanceFrom(Vector2D pos) {
+
+        return Math.abs(pos.posX - this.posX)+Math.abs(pos.posY - this.posY);
     }
 
-    protected double getDistance(Vector2D oponent){
-        return Math.sqrt(Math.pow(posX - oponent.posX,2) + Math.pow(posY - oponent.posY,2));
+    public Vector2D directionTo(Vector2D destination) {
+        return new Vector2D(destination.posX - this.posX, destination.posY - this.posY);
+    }
+
+    @Override
+    public String toString() {
+        return "(" + this.posX + "," + this.posY + ")";
+    }
+
+    public boolean equals(Vector2D pos) {
+        return this.posX == pos.posX && this.posY == pos.posY;
     }
 }
+

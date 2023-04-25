@@ -2,41 +2,42 @@ package Fantasy_game.units;
 import java.util.ArrayList;
 
 public abstract class Marksman extends Hero {
-    protected int range;
+    protected int accuracy, maxAmmo;
     protected int ammo;
 
-    protected Marksman(String c_name, float hp, int maxHp, int attack, int damageMin,
-                      int damageMax, int defense, int speed, int ammo,
-                      int range, int posX, int posY) {
-        super(c_name,hp, maxHp, attack, damageMin, damageMax, defense, speed, posX, posY);
-        this.range = range;
+    protected Marksman(int ammo, int maxAmmo, int accuracy, String name,int hp, int maxHp, int armor, int armorMax,int defenseBreak, int speed, int posX, int posY) {
+        super(name,hp, maxHp,  armor, armorMax, defenseBreak, speed, posX, posY);
+        this.accuracy = accuracy;
         this.ammo = ammo;
+        this.maxAmmo = maxAmmo;
     }
 
+    protected abstract void attackTarget();
     @Override
-    public void step(ArrayList<Hero> team1, ArrayList<Hero> team2) {
-        if (state.equals("Die") || ammo == 0) return;
-        Hero victim = team2.get(findNearest(team2));
-        float damage = (victim.defense - attack)>0 ? damageMin : (victim.defense - attack)<0 ? damageMax : (damageMin+damageMax)/2;
-        victim.getDamage(damage);
-        for (Hero human: team1) {
-            if (human.getInfo().toString().split(":")[0].equals("Militiaman") && human.state.equals("Stand")) {
-                human.state = "Busy";
-                return;
+    public void step(ArrayList<Hero> enemies, ArrayList<Hero> allies) {
+        super.step(enemies, allies);
+        if (this.state.equals("dead")) return;
+        if (this.ammo == 0) {
+            System.out.println(this.name + " has nothing to shoot with...");
+            return;
+        }
+        this.targetHero = this.nearestAliveEnemy(enemies);
+        this.attackTarget();
+        this.ammo--;
+        for (Hero ally :
+                allies) {
+            if ((ally instanceof Militiaman) && (ally.state.equals("ready"))) {
+                this.ammo++;
+                System.out.println(this.getInfo()+" "+this.name+" receives a projectile from "+ally.getInfo()+" "+ally.name);
+                ally.state = "busy";
+                break;
             }
         }
-        ammo--;
-    }
-    @Override
-    public String toString() {
-        return name +
-                " H:" + Math.round(hp) +
-                " D:" + defense +
-                " A:" + attack +
-                " Dmg:" + Math.round(Math.abs((damageMin+damageMax)/2)) +
-                " Shots:" + ammo + " " +
-                state;
     }
 
+    @Override
+    public String toString() {
+        return super.toString()+" \uD83C\uDFF9:"+this.ammo+"("+this.maxAmmo+")";
+    }
 }
 

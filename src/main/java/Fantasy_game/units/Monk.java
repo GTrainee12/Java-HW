@@ -1,19 +1,41 @@
 package Fantasy_game.units;
 
+import Fantasy_game.SpellBook;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+
 public class Monk extends Mag {
-    public Monk(Vector2D coords) {
-        super( "Monk: ",25.f, 25, 6, -6, -6, 2,
-                7, 5 ,10, coords.posX, coords.posY);
+    public Monk(String name, Vector2D coords) {
+        super( 15,10,15,name,25,25,2,2,0,8, coords.posX, coords.posY);
 
     }
 
     @Override
-    public StringBuilder getInfo() {
-        StringBuilder builder = new StringBuilder();
-        return builder.append("Monk: \t").append(Monk.super.name)
-                .append("\t| ATK:\t").append(Monk.super.attack)
-                .append("\t| HP:\t").append(Monk.super.hp)
-                .append(" \t| MP:\t").append(Monk.super.mana)
-                .append("\t|").append("\t| (X.Y) : ").append(Monk.super.coords.posX).append(".").append(Monk.super.coords.posY);
+    protected void pickTarget(ArrayList<Hero> enemies, ArrayList<Hero> allies) {
+        allies.sort(new Comparator<>() {
+            @Override
+            public int compare(Hero h1, Hero h2) {
+                if (h1.state.equals("dead")) return 1;
+                if (h1.getStrPerc()>h2.getStrPerc()) return 1;
+                return -1;
+            }
+        });
+        this.targetHero = allies.get(0);
+    }
+
+    @Override
+    protected SpellBook selectSpell() {
+        if (this.targetHero.hp==this.targetHero.maxHp) return null;
+        if (this.mana <=4 || (this.targetHero.maxHp-this.targetHero.hp)<=3)
+            return SpellBook.OmsHealing;
+        else if ((this.targetHero.maxHp-this.targetHero.hp)<=5) return SpellBook.DmsHealing;
+        else if ((this.mana)>=7) return SpellBook.RealHealing;
+        else return SpellBook.DmsHealing;
+    }
+
+    @Override
+    public String getInfo() {
+        return "Monk :";
     }
 }

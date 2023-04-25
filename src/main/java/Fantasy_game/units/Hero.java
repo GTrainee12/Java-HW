@@ -1,46 +1,42 @@
 package Fantasy_game.units;
 
 import java.util.ArrayList;
+import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Comparator;
 
 public abstract class Hero implements HeroInterface {
 
-    protected String c_name;
-    protected String name;
-    protected float hp;
-    protected int maxHp;
-    protected int attack;
-    protected int damageMin;
-    protected int damageMax;
-    protected int defense;
-    protected int speed;
+
+    public String name;
+    public String state;
+
     protected Vector2D coords;
-    protected String state;
+
+    protected int hp, maxHp;
+
+    protected int armor,maxArmor;
+
+    protected int defenseBreak;
+    public int speed;
+
+    protected Hero targetHero;
+
     protected static int heroCnt;
 
-    public String toString() {
-        return c_name +
-                name +
-                " \u2764:" + Math.round(hp) +
-                " \uD83D\uDEE1\uFE0F:" + defense +
-                " \u2694:" + attack +
-                " \u1f5E1:" + Math.round(Math.abs((damageMin+damageMax)/2)) +
-                " " + state;
-    }
+
     public int[] getCoords() {return new int[]{coords.posX, coords.posY};}
 
-    protected Hero(String c_name,float hp, int maxHp, int attack, int damageMin,
-                       int damageMax, int defense, int speed, int posX, int posY) {
+    protected Hero(String name, int hp, int maxHp, int armor, int maxArmor, int defenseBreak, int speed, int posX, int posY) {
 
-        this.c_name = c_name;
-        this.name = getName();
+        this.name = name;
         this.hp = hp;
         this.maxHp = maxHp;
-        this.attack = attack;
-        this.damageMin = damageMin;
-        this.damageMax = damageMax;
-        this.defense = defense;
+        this.armor = armor;
+        this.maxArmor = maxArmor;
+        this.defenseBreak = defenseBreak;
         this.speed = speed;
+        this.targetHero = null;
         coords = new Vector2D(posX, posY);
         state = "Stand";
         heroCnt++;
@@ -48,39 +44,72 @@ public abstract class Hero implements HeroInterface {
 
     public int getSpeed() { return speed;}
     public float getHp() { return hp;}
-    public String getC_name() {return c_name; }
 
+    protected void Die() {
+        System.out.println(this.getInfo()+this.name+" dies a horrible death...");
+        this.state = "dead";
+    }
 
+    protected void getStrengthDamage(int dmg) {
+        if (dmg<0) {
+            System.out.println(this.getInfo()+this.name+" restores "+Math.min(-dmg, this.maxHp-this.hp)+" ♥️ ");
+            this.hp += Math.min(-dmg, this.maxHp-this.hp);
 
+        }else {
 
-    public void step(ArrayList<Hero> team1, ArrayList<Hero> team2) {}
-    public int findNearest(ArrayList<Hero> team){
-        int index = 0;
-        double min = Double.MAX_VALUE;
-        for (int i = 0; i < team.size(); i++) {
-            if(min > coords.getDistance(team.get(i).coords) && !team.get(i).state.equals("Die")) {
-                index = i;
-                min = coords.getDistance(team.get(i).coords);
+            System.out.println(this.getInfo() + this.name + " gets " + Math.min(dmg, this.hp) + " ♥️ dmg");
+            this.hp -= Math.min(dmg, this.hp);
+            if (hp == 0) this.Die();
+        }
+    }
+
+    protected void getArmorDamage(int armorDmg) {
+        System.out.println(this.getInfo()+this.name+" gets "+Math.min(armorDmg, this.armor)+" \uD83D\uDEE1 dmg");
+        this.armor -= Math.min(armorDmg, this.armor);
+    }
+
+    protected void getHealing(int healPoints) {
+        this.hp += Math.min(healPoints, this.maxHp - this.hp);
+    }
+
+    @Override
+    public void step(ArrayList<Hero> enemies, ArrayList<Hero> allies) {
+        if (this.state.equals("dead")) System.out.println(this.getInfo()+" "+this.name+" is very very dead...");
+    }
+
+    @Override
+    public String toString() {
+        return this.getStateSymbol()+" "+this.getInfo()+this.name+
+                " \uD83C\uDFAF"+this.coords.toString()+
+                " \uD83C\uDF1F:"+this.speed+
+                " ♥️:"+this.hp+"("+this.maxHp+")"+
+                " \uD83D\uDEE1"+this.armor+"("+this.maxArmor+")";
+
+    }
+
+    public Hero nearestAliveEnemy(ArrayList<Hero> enemies){
+        PriorityQueue<Hero> aliveEnemies = new PriorityQueue<>(new Comparator<Hero>() {
+            @Override
+            public int compare(Hero h1, Hero h2) {
+                if (h1.state.equals("dead")) return 1;
+                if (h2.state.equals("dead")) return -1;
+                if (coords.distanceFrom(h1.coords)>coords.distanceFrom(h2.coords)) return 1;
+                return  -1;
             }
+        });
+        aliveEnemies.addAll(enemies);
+        return aliveEnemies.poll();
+    }
+    public float getStrPerc(){
+        return (float)this.hp/(float)this.maxHp;
+    }
+    private String getStateSymbol(){
+        switch (this.state){
+            case "dead": return "☠️";
+            case "ready": return "\uD83D\uDC40";
+            case "busy": return "⏱️";
+            default: return this.state;
         }
-        return index;
-    }
-
-    protected void getDamage(float damage){
-        this.hp -= damage;
-        if (hp <= 0) {
-            hp = 0;
-            state = "Die";
-        }
-        if (hp > maxHp) hp = maxHp;
-    }
-
-    public StringBuilder getInfo() {
-        return new StringBuilder("");
-    }
-
-    protected String getName(){
-        return Nme.values()[new Random().nextInt( Nme.values().length ) ].toString();
     }
 
 }

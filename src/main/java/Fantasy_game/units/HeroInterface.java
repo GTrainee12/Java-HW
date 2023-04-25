@@ -3,9 +3,7 @@ package Fantasy_game.units;
 import java.util.ArrayList;
 
 public interface  HeroInterface {
+    void step(ArrayList<Hero> enemies, ArrayList<Hero> allies);
 
-    StringBuilder getInfo();
-
-    void step(ArrayList<Hero> team1, ArrayList<Hero> team2);
-
+    String getInfo();
 }

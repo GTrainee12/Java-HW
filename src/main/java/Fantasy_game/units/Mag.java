@@ -1,26 +1,46 @@
 package Fantasy_game.units;
 
-
+import Fantasy_game.*;
 import java.util.ArrayList;
 
 public abstract class Mag extends Hero {
     protected int mana;
     protected int maxMana;
+    protected int cost;
 
-    @Override
-    public void step(ArrayList<Hero> team1, ArrayList<Hero> team2) {
-        for (Hero human: team1) {
-            if (human.hp < human.maxHp & !human.state.equals("Die")) {
-                human.getDamage(damageMax);
-                return;
-            }
-        }
-    }
-
-    public Mag(String c_name,float hp, int maxHp, int attack, int damageMin, int damageMax, int defense,
-               int speed, int mana, int maxMana, int posX, int posY) {
-        super(c_name,hp, maxHp, attack, damageMin, damageMax, defense, speed, posX, posY);
+    public Mag(int mana, int cost, int maxMana, String name, int hp, int maxHp, int armor, int armorMax,int defenseBreak,
+               int speed,int posX, int posY) {
+        super(name, hp, maxHp, armor, armorMax,defenseBreak, speed, posX, posY);
         this.mana = mana;
         this.maxMana = maxMana;
+        this.cost = cost;
+    }
+    protected void castSpell(SpellBook spell){
+        if (spell==null) {
+            System.out.println(this.getInfo()+this.name+" can't do anything useful...");
+            return;
+        }
+        System.out.println(this.getInfo()+this.name+" casts "+spell.name+" on "
+                +this.targetHero.getInfo()+this.targetHero.name);
+        this.mana -= spell.manaCost;
+        this.targetHero.getStrengthDamage(spell.spellPower);
+    }
+    protected abstract SpellBook selectSpell();
+    protected abstract void pickTarget(ArrayList<Hero> enemies,ArrayList<Hero> allies);
+
+    @Override
+    public void step(ArrayList<Hero> enemies, ArrayList<Hero> allies)  {
+        super.step(enemies, allies);
+        if (this.state.equals("dead")) return;
+        if (this.mana<3) {
+            System.out.println(this.getInfo()+this.name+" hasn't got enough mana to cast anything..." );
+            return;
+        }
+        this.pickTarget(enemies, allies);
+        this.castSpell(this.selectSpell());
+    }
+    @Override
+    public String toString() {
+        return super.toString()+" \uD83E\uDE84"+this.mana+"("+this.maxMana+")";
     }
 }
